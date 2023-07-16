@@ -1,0 +1,28 @@
+header {
+  display: flex;
+  justify-content: space-between;
+  background-color: #fff;
+  padding: 16px;
+  align-items: center;
+}
+
+.logo img {
+  width: 40px;
+}
+
+/* .search-bar{
+flex-grow: ;
+} */
+
+.search-bar input {
+  width: 100%;
+  border-radius: 14px;
+  box-shadow: 0 0 2px #00000012, 0 2px 2px #0000000f, 0 1px 3px #0000001a;
+  border: none;
+  font-size: 13px;
+  height: 25px;
+}
+
+.user-icon {
+  width: 32px;
+}
