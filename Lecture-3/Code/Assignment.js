@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-DOM/client";
+import ReactDOM from "react-dom/client";
 import logo from "./starbucks-logo.png";
 import user from "./user.png";
 
