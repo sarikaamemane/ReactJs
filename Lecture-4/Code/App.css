@@ -90,3 +90,9 @@ nav ul {
   height: 250px;
   background-color: #e5e4e2;
 }
+
+/* Filter Restaurant */
+.filter {
+  display: flex;
+  gap: 10px;
+}
