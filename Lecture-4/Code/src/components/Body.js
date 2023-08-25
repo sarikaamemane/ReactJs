@@ -1,6 +1,9 @@
 import RestaurantCard from "../components/RestaurantCard";
 import { useState, useEffect } from "react";
 import Shimmer from "./Shimmer";
+import { swiggy_api_URL } from "../utils/constants";
+import { Link } from "react-router-dom";
+import useOnlineStatus from "../utils/useOnlineStatus";
 
 const Body = () => {
   const [searchRestaurant, setSearchRestaurant] = useState("");
@@ -8,18 +11,51 @@ const Body = () => {
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
 
   useEffect(() => {
-    fetchData();
+    getRestaurants();
   }, []);
 
-  const fetchData = async () => {
-    const data = await fetch(
-      "https://www.swiggy.com/dapi/restaurants/list/v5?lat=19.075744915912157&lng=72.86600489169359&page_type=DESKTOP_WEB_LISTING"
+  const onlineStatus = useOnlineStatus();
+  if (onlineStatus === false) {
+    return (
+      <div>
+        <h3>
+          Looks like you are offline. Please check your internet connection
+        </h3>
+      </div>
     );
+  }
 
-    const json = await data.json();
-    setListOfRestaurants(json?.data?.cards[2]?.data?.data?.cards);
-    setFilteredRestaurants(json?.data?.cards[2]?.data?.data?.cards);
-  };
+  async function getRestaurants() {
+    // handle the error using try... catch
+    try {
+      const response = await fetch(swiggy_api_URL);
+      const json = await response.json();
+
+      // initialize checkJsonData() function to check Swiggy Restaurant data
+      async function checkJsonData(jsonData) {
+        for (let i = 0; i < jsonData?.data?.cards.length; i++) {
+          // initialize checkData for Swiggy Restaurant data
+          let checkData =
+            json?.data?.cards[i]?.card?.card?.gridElements?.infoWithStyle
+              ?.restaurants;
+
+          // if checkData is not undefined then return it
+          if (checkData !== undefined) {
+            return checkData;
+          }
+        }
+      }
+
+      // call the checkJsonData() function which return Swiggy Restaurant data
+      const resData = await checkJsonData(json);
+
+      // update the state variable restaurants with Swiggy API data
+      setListOfRestaurants(resData);
+      setFilteredRestaurants(resData);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return listOfRestaurants.length === 0 ? (
     <Shimmer />
@@ -38,7 +74,7 @@ const Body = () => {
           <button
             onClick={() => {
               const filteredRestaurant = listOfRestaurants.filter((res) =>
-                res.data.name
+                res.info.name
                   .toLowerCase()
                   .includes(searchRestaurant.toLowerCase())
               );
@@ -54,7 +90,7 @@ const Body = () => {
           type="button"
           onClick={() => {
             const filteredRestoList = listOfRestaurants.filter(
-              (rest) => rest.data.avgRating > 4
+              (rest) => rest.info.avgRating > 4
             );
             setFilteredRestaurants(filteredRestoList);
           }}
@@ -65,10 +101,12 @@ const Body = () => {
 
       <div className="restaurant-list">
         {filteredRestaurants.map((restaurant) => (
-          <RestaurantCard
-            key={restaurant.data.id}
-            restaurantData={restaurant}
-          />
+          <Link
+            to={"restaurant/" + restaurant.info.id}
+            key={restaurant.info.id}
+          >
+            <RestaurantCard restaurantData={restaurant.info} />
+          </Link>
         ))}
       </div>
     </main>
